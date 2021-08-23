@@ -61,13 +61,13 @@ body{
 
 .logo-tissini {
     
-
-    width: 200px;
+	width: 200px;
+    position: absolute;
     height: 200px;
     background-image: url(https://mitienda.moda/img/logo.e38c8b41.png);
     background-size: cover;
     z-index: 0;
-    
+    top: -62px;
 }
 
 
