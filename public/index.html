@@ -1,43 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon-32x32.png" />
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Web site created using create-react-app" />
+
+  <meta name="google-signin-client_id"
+    content="421744930631-uc9hi9mhplek4pkbeiv2mb2ut9f944j6.apps.googleusercontent.com">
+
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+
+
+  <title>Tissini Test</title>
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+</head>
+
+<body>
+
+
+  <div id="root"></div>
+  
+
+  <script type="text/javascript">
+
+    let url = (window.location.hostname.includes('localhost'))
+      ? 'http://localhost:8080/api/auth/google'
+      : 'https://test-tissini-anthony-henriquez.herokuapp.com/api/auth/google'
+      ;
+    let localUser = {};
+
+    function onSignIn(googleUser) {
+      let id_token = googleUser.getAuthResponse().id_token;
+      const profile = googleUser.getBasicProfile();
+
+      // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      // console.log('Name: ' + profile.getName());
+      // console.log('Image URL: ' + profile.getImageUrl());
+      // console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+      const data = { id_token };
+
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+        .then(response => response.json())
+        .then(data => {
+
+          let { errors, status, msg, user, token } = data;
+          if (errors) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: errors[0].msg
+            })
+          }
+
+          if (status === 400) Swal.fire(msg, '', 'question');
+
+          if (status === 200) {
+            const { uid, nombre } = user;
+
+            localUser.token = token;
+            localUser.uid = uid;
+            localUser.nombre = nombre;
+
+            Swal.fire({
+              position: 'top-end',
+              icon: 'success',
+              title: `Welcome ${user.nombre}`.toLocaleLowerCase(),
+              showConfirmButton: false,
+              timer: 1500,
+              width: '500px',
+              height: '100px',
+            })
+
+            signOut();
+            localStorage.setItem('user', JSON.stringify(localUser));
+            location.reload();
+          }
+
+          //console.log('Success:', data);
+
+        })
+        .catch((error) => console.error('Error:', error));
+
+        function signOut() {
+          const auth2 = window.gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+          });
+      }
+
+
+
+      //console.log(id_token);
+    }
+    function onFailure(error) {
+      console.log(error);
+    }
+
+
+
+    function renderButton() {
+      window.gapi.signin2.render('my-signin2', {
+        'scope': 'profile email',
+        'width': 260,
+        'height': 35,
+        'longtitle': true,
+
+        //'theme': 'dark',
+        'onsuccess': onSignIn,
+        'onfailure': onFailure
+      });
+    }
+
+  </script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+</body>
+
 </html>
