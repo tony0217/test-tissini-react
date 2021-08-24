@@ -81,13 +81,14 @@ body {
  
 
 #grid{	
-	width: auto;
-	position: absolute;
-	left: 340px;
-	height: auto;
-	top: 180px;
-	max-height:540px ;
-	overflow: auto;
+	/* position: relative; */
+    width: auto;
+    height: auto;
+    max-height: 600px;
+	margin-left: 25%;
+	overflow-y: auto;
+	overflow-x: hidden;
+
 }
 #sidebar{
 	float:left;
